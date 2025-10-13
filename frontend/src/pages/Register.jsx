@@ -18,18 +18,22 @@ export default function Register() {
     setError('');
 
     try {
-      const { data } = await axios.post('http://localhost:3000/api/user/register', formData);
-      
+      console.log(formData);
+      const res = await axios.post('http://localhost:3000/api/user/register', formData);
+      const data = res.data;
+
+      console.log("Response:", data);
+
       if (data.success) {
-        localStorage.setItem('token', data.message.accessToken);
-        console.log(data.message.accessToken);
-        localStorage.setItem('user', JSON.stringify(data.result.user));
+        console.log(data.message.token);
+        localStorage.setItem('token', data.message.token);
+        // localStorage.setItem('user', JSON.stringify(data.data.user));
         navigate('/scheduler');
       } else {
         setError(data.message || 'Registration failed');
-        console.log(data);
       }
     } catch (err) {
+      console.error(err);
       setError(err.response?.data?.message || 'Registration failed');
     }
   };

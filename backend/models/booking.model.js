@@ -39,6 +39,7 @@ const bookingSchema = new mongoose.Schema(
       enum: ["Booked", "Completed", "Cancelled"],
       default: "Booked",
     },
+    
   },
   { timestamps: true }
 );

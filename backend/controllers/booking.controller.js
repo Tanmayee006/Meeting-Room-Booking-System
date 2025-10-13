@@ -1,20 +1,20 @@
 import BookingService from "../services/booking.service.js";
 import ApiResponse from "../utils/apiResponse.util.js";
 
-
 const bookRoom = async (req, res) => {
-  try {
-    let data = req.body;
-    data.userName = req.userName;
-    data.userEmail = req.userEmail;
-    console.log(req.body);
-    const booking = await BookingService.addBooking(req.body);
-    return res.status(201).json(new ApiResponse(201, booking, "Room booked successfully", true));
-  } catch (error) {
-    return res.status(400).json(new ApiResponse(400, {}, error.message, false));
-  }
-};
-
+    try {
+      let data = req.body;
+      data.userName = req.userName;
+      data.userEmail = req.userEmail;
+      console.log(data);
+      const booking = await BookingService.addBooking(data);
+      console.log(data);
+      return res.status(201).json(new ApiResponse(201, booking, "Room booked successfully", true));
+    } catch (error) {
+      return res.status(400).json(new ApiResponse(400, {}, error.message, false));
+    }
+  };
+  
 
 const getAllBookings = async (req, res) => {
   try {
@@ -51,5 +51,16 @@ const getBookingById = async (req, res) => {
   }
 };
 
+const completeBooking = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const booking = await BookingService.updateStatus(id, 'Completed');
+      return res.status(200).json(new ApiResponse(200, booking, "Booking marked as completed", true));
+    } catch (error) {
+      return res.status(400).json(new ApiResponse(400, {}, error.message, false));
+    }
+  };
+  
 
-export {bookRoom, getAllBookings, cancelBooking, getBookingById};
+
+export {bookRoom, getAllBookings, cancelBooking, getBookingById, completeBooking};

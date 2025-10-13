@@ -1,39 +1,26 @@
-import axios from 'axios';
+import React from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import Login from "./pages/Login";
 
-const API_URL = 'http://localhost:3000/api';
+import Register from "./pages/Register";
+import Scheduler from "./pages/Scheduler";
+import Bookings from "./pages/Bookings";
+import Header from "./components/Header";
 
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+export default function App() {
+  const location = useLocation();
+  const hideHeader = location.pathname === "/" || location.pathname === "/register";
 
-// Add token to requests
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Handle response errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default api;
+  return (
+    <div className="app-root">
+      <main className="container">
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/scheduler" element={<Scheduler />} />
+          <Route path="/bookings" element={<Bookings />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}

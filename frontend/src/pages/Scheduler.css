@@ -1,0 +1,120 @@
+.scheduler-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .scheduler-grid {
+    display: grid;
+    grid-template-columns: 120px repeat(3, 1fr); /* Adjust based on number of rooms */
+    gap: 2px;
+  }
+  
+  .time-column {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header-cell,
+  .room-header {
+    background-color: #f0f0f0;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .time-cell {
+    padding: 10px;
+    text-align: center;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+  }
+  
+  .room-column {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .time-slot {
+    height: 60px;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .time-slot.available {
+    background-color: #e0e0e0;
+  }
+  
+  .time-slot.booked {
+    background-color: #10B981; /* Green for booked slots */
+    color: white;
+  }
+  
+  .time-slot.completed {
+    background-color: #6B7280; /* Gray for completed slots */
+    color: white;
+  }
+  
+  .booking-info {
+    font-size: 12px;
+    text-align: left;
+    padding: 5px;
+  }
+  
+  .booking-info button {
+    margin: 2px;
+    padding: 2px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 3px;
+  }
+  
+  .booking-info button:first-child {
+    background-color: #EF4444; /* Red for cancel */
+    color: white;
+  }
+  
+  .booking-info button:nth-child(2) {
+    background-color: #3B82F6; /* Blue for complete */
+    color: white;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 400px;
+    text-align: center;
+  }
+  
+  .modal textarea {
+    width: 100%;
+    height: 80px;
+    margin: 10px 0;
+  }
+  
+  .modal button {
+    padding: 8px 16px;
+    background-color: #10B981;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
