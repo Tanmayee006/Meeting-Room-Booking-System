@@ -2,15 +2,21 @@ import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema(
   {
-    roomId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Room",
+    roomName: {
+      type: String,
       required: true,
+      trim: true,
     },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    userName: {
+      type: String,
       required: true,
+      trim: true,
+    },
+    userEmail: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
     },
     startTime: {
       type: Date,
@@ -20,36 +26,22 @@ const bookingSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    duration: {
+      type: Number,
+      required: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
     status: {
       type: String,
-      enum: ["booked", "cancelled", "completed"],
-      default: "booked",
+      enum: ["Booked", "Completed", "Cancelled"],
+      default: "Booked",
     },
   },
   { timestamps: true }
 );
-
-
-bookingSchema.pre("save", async function (next) {
-  const Booking = mongoose.model("Booking");
-
-  const overlapping = await Booking.findOne({
-    roomId: this.roomId,
-    status: "booked",
-    $or: [
-      { startTime: { $lt: this.endTime, $gte: this.startTime } },
-      { endTime: { $gt: this.startTime, $lte: this.endTime } },
-      { startTime: { $lte: this.startTime }, endTime: { $gte: this.endTime } },
-    ],
-  });
-
-  if (overlapping) {
-    const err = new Error("This time slot is already booked for the room.");
-    return next(err);
-  }
-
-  next();
-});
 
 const Booking = mongoose.model("Booking", bookingSchema);
 export default Booking;

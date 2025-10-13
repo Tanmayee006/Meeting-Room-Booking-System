@@ -1,13 +1,16 @@
 import { Router  } from "express";
-import {createUser, getUsers, getUserByEmail} from '../controllers/user.controller.js'
+import {login, register, getUsers, getUserByEmail} from '../controllers/user.controller.js'
+import {validateToken} from '../middleware/jwt.middleware.js'
 const router = Router();
 
 
-router.post('/user', createUser);
+router.post('/user/register', register);
 
-router.get('/user', getUsers);
+router.post('/user/login', login);
 
-router.get('/user/:id', getUserByEmail);
+router.get('/user', validateToken, getUsers);
+
+router.get('/user/:email', validateToken, getUserByEmail);
 
 
 export default router;

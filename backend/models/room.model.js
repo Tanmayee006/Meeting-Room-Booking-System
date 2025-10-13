@@ -1,29 +1,16 @@
 import mongoose from "mongoose";
 
-const roomSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
-    location: {
-      type: String,
-      trim: true,
-    },
-    capacity: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    resources: {
-      type: [String], 
-      default: [],
-    },
+const roomSchema = new mongoose.Schema({
+  roomName: { 
+    type: String, 
+    required: true, 
+    unique: true
   },
-  { timestamps: true }
-);
+  status: { 
+    type: String,
+    enum: ["Available", "Booked"],
+    default: "Available"
+ }
+});
 
-const Room = mongoose.model("Room", roomSchema);
-export default Room;
+export default mongoose.model("Room", roomSchema);
