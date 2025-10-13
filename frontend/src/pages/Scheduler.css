@@ -1,87 +1,75 @@
 .scheduler-container {
     padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    font-family: Arial, sans-serif;
   }
   
   .scheduler-grid {
-    display: grid;
-    grid-template-columns: 120px repeat(3, 1fr); /* Adjust based on number of rooms */
-    gap: 2px;
+    display: flex;
+    border: 1px solid #ccc;
   }
   
   .time-column {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .header-cell,
-  .room-header {
-    background-color: #f0f0f0;
-    padding: 10px;
-    text-align: center;
-    font-weight: bold;
-  }
-  
-  .time-cell {
-    padding: 10px;
-    text-align: center;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    min-width: 150px;
+    background: #f4f4f4;
   }
   
   .room-column {
-    display: flex;
-    flex-direction: column;
+    flex: 1;
+  }
+  
+  .header-cell,
+  .room-header,
+  .time-cell {
+    padding: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
   }
   
   .time-slot {
+    padding: 10px;
     height: 60px;
-    border: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border-bottom: 1px solid #eee;
     cursor: pointer;
-    position: relative;
+    transition: background 0.3s;
   }
   
-  .time-slot.available {
-    background-color: #e0e0e0;
+  .time-slot.available:hover {
+    background: #e5f3ff;
   }
   
   .time-slot.booked {
-    background-color: #10B981; /* Green for booked slots */
+    background: #22c55e; /* ✅ green */
     color: white;
   }
   
   .time-slot.completed {
-    background-color: #6B7280; /* Gray for completed slots */
+    background: #9ca3af; /* gray */
     color: white;
   }
   
   .booking-info {
-    font-size: 12px;
-    text-align: left;
-    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
   
-  .booking-info button {
-    margin: 2px;
-    padding: 2px 8px;
-    font-size: 10px;
-    cursor: pointer;
+  .cancel-btn {
+    background: #ef4444;
+    color: white;
     border: none;
-    border-radius: 3px;
+    padding: 4px 6px;
+    cursor: pointer;
+    font-size: 12px;
   }
   
-  .booking-info button:first-child {
-    background-color: #EF4444; /* Red for cancel */
+  .done-btn {
+    background: #2563eb;
     color: white;
-  }
-  
-  .booking-info button:nth-child(2) {
-    background-color: #3B82F6; /* Blue for complete */
-    color: white;
+    border: none;
+    padding: 4px 6px;
+    cursor: pointer;
+    font-size: 12px;
   }
   
   .modal-overlay {
@@ -99,22 +87,16 @@
   .modal {
     background: white;
     padding: 20px;
-    border-radius: 5px;
-    width: 400px;
-    text-align: center;
+    max-width: 400px;
+    border-radius: 8px;
   }
   
-  .modal textarea {
-    width: 100%;
-    height: 80px;
-    margin: 10px 0;
-  }
-  
-  .modal button {
-    padding: 8px 16px;
-    background-color: #10B981;
+  .confirm-btn {
+    background: #22c55e;
     color: white;
     border: none;
-    border-radius: 3px;
+    padding: 8px 12px;
+    margin-top: 10px;
     cursor: pointer;
   }
+  

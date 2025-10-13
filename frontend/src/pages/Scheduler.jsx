@@ -57,11 +57,17 @@ export default function Scheduler() {
       if (booking.roomName !== roomName) return false;
       const bookingDate = new Date(booking.startTime).toISOString().split('T')[0];
       if (bookingDate !== selectedDate) return false;
+  
       const bookStart = new Date(booking.startTime);
       const slotTime = new Date(`${selectedDate}T${time24}:00`);
-      return bookStart.getTime() === slotTime.getTime();
+  
+      return (
+        bookStart.getHours() === slotTime.getHours() &&
+        bookStart.getMinutes() === slotTime.getMinutes()
+      );
     });
   };
+  
 
   const handleSlotClick = (room, time) => {
     if (getBookingForSlot(room.name, time)) return;
@@ -95,7 +101,6 @@ export default function Scheduler() {
       );
 
       if (data.success) {
-        // ✅ Add new booking instantly to UI
         setBookings((prev) => [...prev, data.result]);
         setShowModal(false);
         setDescription('');
@@ -114,7 +119,6 @@ export default function Scheduler() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // ✅ Remove the booking from local state
       setBookings((prev) => prev.filter((b) => b._id !== bookingId));
     } catch {
       alert('Failed to cancel booking');
@@ -129,8 +133,10 @@ export default function Scheduler() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // ✅ Remove from UI (since backend deletes it)
-      setBookings((prev) => prev.filter((b) => b._id !== bookingId));
+      // update status in state instead of removing
+      setBookings((prev) =>
+        prev.map((b) => (b._id === bookingId ? { ...b, status: 'Completed' } : b))
+      );
     } catch {
       alert('Failed to complete booking');
     }
@@ -140,6 +146,7 @@ export default function Scheduler() {
     <div className="scheduler-container">
       <h1>📅 Meeting Room Scheduler</h1>
       <div className="scheduler-grid">
+        {/* Time column */}
         <div className="time-column">
           <div className="header-cell">Meeting Rooms</div>
           {timeSlots.map((time) => (
@@ -149,14 +156,18 @@ export default function Scheduler() {
           ))}
         </div>
 
+        {/* Room columns */}
         {rooms.map((room) => (
           <div key={room._id} className="room-column">
             <div className="room-header">{room.name}</div>
             {timeSlots.map((time) => {
               const booking = getBookingForSlot(room.name, time);
               const slotClass =
-                booking?.status === 'Completed' ? 'completed' :
-                booking ? 'booked' : 'available';
+                booking?.status === 'Completed'
+                  ? 'completed'
+                  : booking
+                  ? 'booked'
+                  : 'available';
               return (
                 <div
                   key={time}
@@ -170,14 +181,16 @@ export default function Scheduler() {
                       {booking.status === 'Booked' && (
                         <>
                           <button
+                            className="cancel-btn"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleFreeUp(booking._id);
                             }}
                           >
-                            × Cancel
+                            ❌ Cancel
                           </button>
                           <button
+                            className="done-btn"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleComplete(booking._id);
@@ -187,6 +200,7 @@ export default function Scheduler() {
                           </button>
                         </>
                       )}
+                      {booking.status === 'Completed' && <div>✅ Completed</div>}
                     </div>
                   )}
                 </div>
@@ -196,6 +210,7 @@ export default function Scheduler() {
         ))}
       </div>
 
+      {/* Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -211,7 +226,9 @@ export default function Scheduler() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Meeting description"
             />
-            <button onClick={handleBooking}>Confirm</button>
+            <button className="confirm-btn" onClick={handleBooking}>
+              Confirm Booking
+            </button>
           </div>
         </div>
       )}
