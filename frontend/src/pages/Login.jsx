@@ -15,10 +15,15 @@ export default function Login() {
     setError('');
 
     try {
-      const { data } = await axios.post('http://localhost:3000/api/users/login', formData);
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      navigate('/scheduler');
+      const { data } = await axios.post('http://localhost:3000/api/user/login', formData);
+      
+      if (data.success) {
+        localStorage.setItem('token', data.result.token);
+        localStorage.setItem('user', JSON.stringify(data.result.user));
+        navigate('/scheduler');
+      } else {
+        setError(data.message || 'Login failed');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     }
@@ -27,7 +32,7 @@ export default function Login() {
   return (
     <div className="container">
       <div className="auth-container">
-        <h2>Login</h2>
+        <h2>Login to Meeting Room Scheduler</h2>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <label>
@@ -36,6 +41,7 @@ export default function Login() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="Enter your email"
               required
             />
           </label>
@@ -45,6 +51,7 @@ export default function Login() {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="Enter your password"
               required
             />
           </label>

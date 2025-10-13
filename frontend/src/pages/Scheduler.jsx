@@ -1,76 +1,98 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export default function Scheduler() {
-  const [rooms, setRooms] = useState([]);
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [duration, setDuration] = useState(60);
   const [showModal, setShowModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [purpose, setPurpose] = useState('');
+  const [description, setDescription] = useState('');
 
-  const timeSlots = Array.from({ length: 12 }, (_, i) => {
-    const hour = 9 + i;
-    return `${hour}:00`;
-  });
+  // Fixed room names matching the UI
+  const rooms = [
+    { _id: '1', name: 'Lagos Meeting Blue', color: '#3B82F6' },
+    { _id: '2', name: 'Nairobi Conference', color: '#8B5CF6' },
+    { _id: '3', name: 'Cairo Board Room', color: '#10B981' }
+  ];
+
+  const timeSlots = [
+    '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', 
+    '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', 
+    '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM'
+  ];
 
   useEffect(() => {
-    fetchRooms();
-  }, []);
-
-  useEffect(() => {
-    if (selectedDate) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/');
+    } else {
       fetchBookings();
     }
-  }, [selectedDate]);
-
-  const fetchRooms = async () => {
-    try {
-      const { data } = await axios.get('http://localhost:3000/api/rooms');
-      setRooms(data.rooms);
-    } catch (error) {
-      console.error('Error fetching rooms:', error);
-    }
-  };
+  }, [navigate, selectedDate]);
 
   const fetchBookings = async () => {
     try {
       const token = localStorage.getItem('token');
-      const { data } = await axios.get(`http://localhost:3000/api/bookings?date=${selectedDate}`, {
+      const { data } = await axios.get(`http://localhost:3000/api/booking`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setBookings(data.bookings);
+      
+      if (data.success) {
+        setBookings(data.result);
+      }
     } catch (error) {
       console.error('Error fetching bookings:', error);
     }
   };
 
-  const isSlotBooked = (roomId, startTime) => {
+  const convertTo24Hour = (time) => {
+    const [timePart, period] = time.split(' ');
+    let [hours, minutes] = timePart.split(':').map(Number);
+    
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
+
+  const isSlotBooked = (roomName, startTime) => {
+    const time24 = convertTo24Hour(startTime);
+    
     return bookings.some(booking => {
-      if (booking.room._id !== roomId || booking.status === 'cancelled') return false;
+      if (booking.roomName !== roomName || booking.status === 'Cancelled') return false;
       
-      const [bookStartHour] = booking.startTime.split(':').map(Number);
-      const [slotHour] = startTime.split(':').map(Number);
-      const [bookEndHour] = booking.endTime.split(':').map(Number);
+      const bookingDate = new Date(booking.startTime).toISOString().split('T')[0];
+      if (bookingDate !== selectedDate) return false;
       
-      return slotHour >= bookStartHour && slotHour < bookEndHour;
+      const bookStart = new Date(booking.startTime);
+      const bookEnd = new Date(booking.endTime);
+      const slotTime = new Date(`${selectedDate}T${time24}:00`);
+      
+      return slotTime >= bookStart && slotTime < bookEnd;
     });
   };
 
-  const getBookingForSlot = (roomId, startTime) => {
+  const getBookingForSlot = (roomName, startTime) => {
+    const time24 = convertTo24Hour(startTime);
+    
     return bookings.find(booking => {
-      if (booking.room._id !== roomId || booking.status === 'cancelled') return false;
+      if (booking.roomName !== roomName || booking.status === 'Cancelled') return false;
       
-      const [bookStartHour] = booking.startTime.split(':').map(Number);
-      const [slotHour] = startTime.split(':').map(Number);
+      const bookingDate = new Date(booking.startTime).toISOString().split('T')[0];
+      if (bookingDate !== selectedDate) return false;
       
-      return bookStartHour === slotHour;
+      const bookStart = new Date(booking.startTime);
+      const slotTime = new Date(`${selectedDate}T${time24}:00`);
+      
+      return bookStart.getTime() === slotTime.getTime();
     });
   };
 
   const handleSlotClick = (room, time) => {
-    if (isSlotBooked(room._id, time)) return;
+    if (isSlotBooked(room.name, time)) return;
     
     setSelectedSlot({ room, time });
     setShowModal(true);
@@ -81,27 +103,48 @@ export default function Scheduler() {
 
     try {
       const token = localStorage.getItem('token');
-      const [hour] = selectedSlot.time.split(':').map(Number);
-      const endHour = hour + Math.floor(duration / 60);
-      const endTime = `${endHour}:00`;
+      const startTime24 = convertTo24Hour(selectedSlot.time);
+      const [hours, minutes] = startTime24.split(':').map(Number);
+      const endHours = hours + Math.floor(duration / 60);
+      const endMinutes = minutes + (duration % 60);
+      const endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
 
-      await axios.post('http://localhost:7000/api/bookings', {
-        roomId: selectedSlot.room._id,
-        date: selectedDate,
-        startTime: selectedSlot.time,
-        endTime,
+      const startDateTime = new Date(`${selectedDate}T${startTime24}:00`);
+      const endDateTime = new Date(`${selectedDate}T${endTime}:00`);
+
+      const response = await axios.post('http://localhost:3000/api/booking', {
+        roomName: selectedSlot.room.name,
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
         duration,
-        purpose
+        description
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      alert('Booking successful!');
-      setShowModal(false);
-      setPurpose('');
-      fetchBookings();
+      if (response.data.success) {
+        alert('Booking successful!');
+        setShowModal(false);
+        setDescription('');
+        fetchBookings();
+      }
     } catch (error) {
       alert(error.response?.data?.message || 'Booking failed');
+    }
+  };
+
+  const handleFreeUp = async (bookingId) => {
+    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`http://localhost:3000/api/booking/${bookingId}/cancel`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Booking cancelled successfully');
+      fetchBookings();
+    } catch (error) {
+      alert('Failed to cancel booking');
     }
   };
 
@@ -182,21 +225,28 @@ export default function Scheduler() {
               {room.name}
             </div>
             {timeSlots.map(time => {
-              const booking = getBookingForSlot(room._id, time);
-              const isBooked = isSlotBooked(room._id, time);
+              const booking = getBookingForSlot(room.name, time);
+              const isBooked = isSlotBooked(room.name, time);
               
               return (
                 <div
                   key={time}
                   className={`time-slot ${isBooked ? 'booked' : 'available'}`}
                   onClick={() => handleSlotClick(room, time)}
-                  style={{ cursor: isBooked ? 'not-allowed' : 'pointer' }}
                 >
-                  {booking && booking.startTime === time && (
-                    <div className="booking-info" style={{ backgroundColor: `${room.color}20` }}>
+                  {booking && (
+                    <div className="booking-info" style={{ borderLeftColor: room.color }}>
                       <div className="booking-user">👤 {booking.userName}</div>
                       <div className="booking-duration">{booking.duration} min</div>
-                      <button className="free-up-btn">× Free Up</button>
+                      <button 
+                        className="free-up-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFreeUp(booking._id);
+                        }}
+                      >
+                        × Free Up
+                      </button>
                     </div>
                   )}
                 </div>
@@ -212,16 +262,16 @@ export default function Scheduler() {
             <h2>Book Meeting Room</h2>
             <div className="modal-content">
               <p><strong>Room:</strong> {selectedSlot?.room.name}</p>
-              <p><strong>Date:</strong> {selectedDate}</p>
+              <p><strong>Date:</strong> {new Date(selectedDate).toLocaleDateString()}</p>
               <p><strong>Time:</strong> {selectedSlot?.time}</p>
               <p><strong>Duration:</strong> {duration} minutes</p>
               
               <label>
-                Purpose (optional):
+                Description (optional):
                 <textarea
-                  value={purpose}
-                  onChange={(e) => setPurpose(e.target.value)}
-                  placeholder="Meeting purpose..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Meeting description..."
                   rows={3}
                 />
               </label>

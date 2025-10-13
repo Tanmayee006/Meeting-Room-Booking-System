@@ -9,26 +9,16 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/login');
+    navigate('/');
   };
 
   return (
     <header className="header">
       <nav>
-        {/* <Link to="/">Home</Link> */}
-        {token ? (
-          <>
-            <Link to="/scheduler">Scheduler</Link>
-            <Link to="/bookings">My Bookings</Link>
-            <span>Welcome, {user.name}</span>
-            <button onClick={handleLogout} className="btn-secondary">Logout</button>
-          </>
-        ) : (
-          <>
-            {/* <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link> */}
-          </>
-        )}
+        <Link to="/scheduler">🏠 Scheduler</Link>
+        <Link to="/bookings">📋 My Bookings</Link>
+        <span>Welcome, {user.name || 'User'}</span>
+        <button onClick={handleLogout} className="btn-secondary">Logout</button>
       </nav>
     </header>
   );

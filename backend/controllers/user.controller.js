@@ -14,26 +14,29 @@ const login = async (req, res) => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ Message: "Please enter email and password" });
+            return res.status(400).json(new ApiResponse(400, {}, "Please enter email and password", false));
         }
 
         let user = await UserService.getByEmail(email);
         if (!user || !user.password) {
-            return res.status(403).json({ Message: "Invalid email or password" });
+            return res.status(403).json(new ApiResponse(403, {}, "Invalid email or password", false));
         }
 
         const isPasswordValid = await argon2.verify(user.password, password);
         if (!isPasswordValid) {
-            return res.status(403).json({ Message: "Invalid email or password" });
+            return res.status(403).json(new ApiResponse(403, {}, "Invalid email or password", false));
         }
+        
         const userObj = user.toObject();
-        const accessToken = jwt.sign({ email: user.email, name:userObj.name }, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-        userObj.accessToken = accessToken;
-        return res.status(200).json(new ApiResponse(200, userObj,  "User logged in successfully", true));
+        delete userObj.password;
+        
+        const accessToken = jwt.sign({ email: user.email, name: userObj.name }, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+        
+        return res.status(200).json(new ApiResponse(200, { user: userObj, token: accessToken }, "User logged in successfully", true));
 
     } catch (error) {
         console.error(error.message);
-        return res.status(500).json({ Message: "Server error during login" });
+        return res.status(500).json(new ApiResponse(500, {}, "Server error during login", false));
     }
 };
 
@@ -42,12 +45,12 @@ const register = async (req, res) => {
         const { name, email, designation, team, password } = req.body;
 
         if (!name || !email || !designation || !team || !password) {
-            return res.status(400).json({ Message: "Please enter all fields" });
+            return res.status(400).json(new ApiResponse(400, {}, "Please enter all fields", false));
         }
 
         const existingUser = await UserService.getByEmail(email);
         if (existingUser) {
-            return res.status(403).json({ Message: "Email already exists" });
+            return res.status(403).json(new ApiResponse(403, {}, "Email already exists", false));
         }
 
         const hashedPassword = await argon2.hash(password);
@@ -59,20 +62,19 @@ const register = async (req, res) => {
             team,
             password: hashedPassword,
         });
+        
         const userObj = newUser.toObject();
-        const accessToken = jwt.sign({ email: newUser.email, name:name }, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-        userObj.accessToken = accessToken;
-        console.log(newUser);
-        return res.status(200).json(new ApiResponse(200, userObj,  "User registered successfully", true));
+        delete userObj.password;
+        
+        const accessToken = jwt.sign({ email: newUser.email, name: name }, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+        
+        return res.status(200).json(new ApiResponse(200, { user: userObj, token: accessToken }, "User registered successfully", true));
 
     } catch (error) {
         console.error(error.message);
-        return res.status(500).json({ Message: "Server error during registration" });
+        return res.status(500).json(new ApiResponse(500, {}, "Server error during registration", false));
     }
 };
-
-
-
 
 const getUsers = async (req, res) => {
     try {
@@ -87,7 +89,6 @@ const getUsers = async (req, res) => {
 const getUserByEmail = async (req, res) => {
     try {
         const user = await UserService.getByEmail(req.params.email);
-        console.log(req.params.email)
         if (!user) return res.status(404).json(new ApiResponse(404, {}, "User not found", false));
         return res.status(200).json(new ApiResponse(200, user, "User fetched successfully", true));
     } 
