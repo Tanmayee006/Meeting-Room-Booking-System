@@ -12,6 +12,7 @@ export default function App() {
 
   return (
     <div className="app-root">
+      {!hideHeader && <Header />}
       <main className="container">
         <Routes>
           <Route path="/" element={<Login />} />

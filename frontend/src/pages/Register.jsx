@@ -12,29 +12,32 @@ export default function Register() {
     team: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
-      console.log(formData);
       const res = await axios.post('http://localhost:3000/api/user/register', formData);
       const data = res.data;
 
-      console.log("Response:", data);
+      console.log("Registration Response:", data);
 
       if (data.success) {
-        console.log(data.message.token);
-        localStorage.setItem('token', data.message.token);
-        // localStorage.setItem('user', JSON.stringify(data.data.user));
+        localStorage.setItem('token', data.result.token);
+        localStorage.setItem('user', JSON.stringify(data.result.user));
+        alert('Registration successful!');
         navigate('/scheduler');
       } else {
         setError(data.message || 'Registration failed');
       }
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Registration failed');
+      console.error('Registration error:', err);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,6 +55,7 @@ export default function Register() {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Enter your full name"
               required
+              disabled={loading}
             />
           </label>
           <label>
@@ -62,6 +66,7 @@ export default function Register() {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="Enter your email"
               required
+              disabled={loading}
             />
           </label>
           <label>
@@ -73,6 +78,7 @@ export default function Register() {
               placeholder="Enter your password"
               required
               minLength={6}
+              disabled={loading}
             />
           </label>
           <label>
@@ -83,6 +89,7 @@ export default function Register() {
               onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
               placeholder="Enter your designation"
               required
+              disabled={loading}
             />
           </label>
           <label>
@@ -93,9 +100,12 @@ export default function Register() {
               onChange={(e) => setFormData({ ...formData, team: e.target.value })}
               placeholder="Enter your team"
               required
+              disabled={loading}
             />
           </label>
-          <button type="submit" className="btn-primary">Register</button>
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Registering...' : 'Register'}
+          </button>
         </form>
         <p>Already have an account? <Link to="/">Login</Link></p>
       </div>

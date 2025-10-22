@@ -15,10 +15,13 @@ class BookingService {
       throw new Error("endTime must be after startTime");
     }
 
-    // check for conflict
+    // Check for conflict
     const conflict = await Booking.findOne({
       roomName,
-      $or: [{ startTime: { $lt: end }, endTime: { $gt: start } }],
+      status: { $ne: 'Cancelled' }, // Don't check cancelled bookings
+      $or: [
+        { startTime: { $lt: end }, endTime: { $gt: start } }
+      ],
     });
 
     if (conflict) {
@@ -39,31 +42,35 @@ class BookingService {
     return await Booking.find().sort({ startTime: 1 });
   }
 
-  // 🆕 Delete booking if it's cancelled
   async cancelBooking(id) {
     const booking = await Booking.findById(id);
     if (!booking) throw new Error("Booking not found");
 
-    // delete it
+    // Delete the booking instead of just marking as cancelled
     await Booking.findByIdAndDelete(id);
-    return { message: "Booking cancelled and deleted successfully" };
+    return { message: "Booking cancelled and deleted successfully", _id: id };
   }
 
   async getBookingById(id) {
     return await Booking.findById(id);
   }
 
-  // 🆕 Delete booking if it's completed
   async updateStatus(id, status) {
     const booking = await Booking.findById(id);
     if (!booking) throw new Error("Booking not found");
 
-    if (status === "Completed" || status === "Cancelled") {
-      await Booking.findByIdAndDelete(id);
-      return { message: `Booking ${status.toLowerCase()} and deleted successfully` };
+    if (status === "Completed") {
+      // Update status instead of deleting
+      booking.status = status;
+      await booking.save();
+      return booking;
     }
 
-    // fallback if you want to keep other statuses
+    if (status === "Cancelled") {
+      await Booking.findByIdAndDelete(id);
+      return { message: `Booking cancelled and deleted successfully`, _id: id };
+    }
+
     booking.status = status;
     await booking.save();
     return booking;

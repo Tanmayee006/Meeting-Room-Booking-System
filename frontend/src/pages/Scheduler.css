@@ -1,102 +1,312 @@
 .scheduler-container {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-  }
-  
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.scheduler-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.scheduler-header h1 {
+  font-size: 2rem;
+  color: #1F2937;
+  margin-bottom: 1rem;
+}
+
+.date-selector {
+  margin-top: 1rem;
+}
+
+.date-selector label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.date-selector input[type="date"] {
+  padding: 0.5rem 1rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.scheduler-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.duration-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.duration-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.duration-buttons button {
+  padding: 0.5rem 1rem;
+  background: #F3F4F6;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.duration-buttons button:hover {
+  background: #E5E7EB;
+}
+
+.duration-buttons button.active {
+  background: #3B82F6;
+  color: white;
+  border-color: #3B82F6;
+}
+
+.scheduler-grid {
+  display: flex;
+  gap: 1px;
+  background: #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.time-column {
+  background: white;
+  min-width: 120px;
+}
+
+.header-cell {
+  padding: 1rem;
+  font-weight: 600;
+  text-align: center;
+  background: #F9FAFB;
+  border-bottom: 2px solid #E5E7EB;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-cell {
+  padding: 1rem;
+  text-align: center;
+  font-weight: 500;
+  color: #6B7280;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.room-column {
+  flex: 1;
+  min-width: 250px;
+  background: white;
+}
+
+.room-header {
+  padding: 1rem;
+  font-weight: 600;
+  text-align: center;
+  background: #F9FAFB;
+  border-bottom: 2px solid #E5E7EB;
+  border-top: 3px solid;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.room-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.time-slot {
+  height: 80px;
+  border-bottom: 1px solid #F3F4F6;
+  position: relative;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.time-slot.available {
+  background: white;
+  cursor: pointer;
+}
+
+.time-slot.available:hover {
+  background: #DBEAFE;
+}
+
+.time-slot.booked {
+  background: #FEF2F2;
+  cursor: not-allowed;
+}
+
+.booking-info {
+  padding: 0.5rem;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-left: 3px solid;
+  font-size: 0.875rem;
+}
+
+.booking-user {
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 0.25rem;
+}
+
+.booking-duration {
+  color: #6B7280;
+  margin-bottom: 0.25rem;
+}
+
+.booking-description {
+  color: #4B5563;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cancel-btn,
+.done-btn {
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.cancel-btn:hover {
+  background: #DC2626;
+  color: white;
+}
+
+.done-btn {
+  background: #D1FAE5;
+  color: #059669;
+}
+
+.done-btn:hover {
+  background: #059669;
+  color: white;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal h2 {
+  margin-bottom: 1.5rem;
+  color: #1F2937;
+}
+
+.modal p {
+  margin-bottom: 1rem;
+  color: #4B5563;
+}
+
+.modal label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.modal textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.confirm-btn {
+  background: #22c55e;
+  color: white;
+}
+
+.confirm-btn:hover {
+  background: #16a34a;
+}
+
+@media (max-width: 768px) {
   .scheduler-grid {
-    display: flex;
-    border: 1px solid #ccc;
-  }
-  
-  .time-column {
-    min-width: 150px;
-    background: #f4f4f4;
+    overflow-x: auto;
   }
   
   .room-column {
-    flex: 1;
+    min-width: 200px;
   }
-  
-  .header-cell,
-  .room-header,
-  .time-cell {
-    padding: 10px;
-    font-weight: bold;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
-  }
-  
-  .time-slot {
-    padding: 10px;
-    height: 60px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  
-  .time-slot.available:hover {
-    background: #e5f3ff;
-  }
-  
-  .time-slot.booked {
-    background: #22c55e; /* ✅ green */
-    color: white;
-  }
-  
-  .time-slot.completed {
-    background: #9ca3af; /* gray */
-    color: white;
-  }
-  
-  .booking-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  
-  .cancel-btn {
-    background: #ef4444;
-    color: white;
-    border: none;
-    padding: 4px 6px;
-    cursor: pointer;
-    font-size: 12px;
-  }
-  
-  .done-btn {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 4px 6px;
-    cursor: pointer;
-    font-size: 12px;
-  }
-  
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .modal {
-    background: white;
-    padding: 20px;
-    max-width: 400px;
-    border-radius: 8px;
-  }
-  
-  .confirm-btn {
-    background: #22c55e;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    margin-top: 10px;
-    cursor: pointer;
-  }
-  
+}
